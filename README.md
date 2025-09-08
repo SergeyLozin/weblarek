@@ -98,3 +98,93 @@ Presenter - презентер содержит основную логику п
 `emit<T extends object>(event: string, data?: T): void` - инициализация события. При вызове события в метод передается название события и объект с данными, который будет использован как аргумент для вызова обработчика.  
 `trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void` - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие с передачей в него данных из второго параметра.
 
+### Данные
+Интерфейсы 
+`interface IProduct {
+  id: string;           // Уникальный идентификатор товара
+  title: string;        // Название товара
+  image: string;        // URL изображения карточки
+  category: string;     // Категория товара
+  price: number | null; // Цена (цифра или null для "бесценных" товаров)
+  description: string;  // Описание товара
+}`
+
+`interface ICustomer {
+  payment: 'card' | 'cash'; // Способ оплаты
+  address: string;          // Адрес доставки
+  email: string;            // Email
+  phone: string;            // Телефон
+}`
+
+### Модели данных
+
+#### Класс ProductModel 
+Хранит и управляет данными о товарах из каталога
+
+Поля класса: 
+`products: IProduct[], selectedProduct: IProduct | null` - каталог и выбранный товар
+
+Методы класса: 
+
+`setProducts(products: IProduct[]): void` — сохраняет массив товаров
+
+`getProducts(): IProduct[]` — возвращает массив товаров
+
+`setSelectedProduct(product: IProduct | null): void` — сохраняет выбранную карточку товара
+
+`getSelectedProduct(): IProduct | null` — возвращает данные выбранного товара
+
+`getProductById(id: string): IProduct | undefined` - получает товар по его айди
+
+#### Класс CartModel
+Управляет состоянием корзины
+
+Поля класса: `items: IProduct[] = [];` - массив товаров в корзине
+
+Методы класса:
+
+`addProduct(product: IProduct): void` — добавляет товар в корзину 
+
+`removeProduct(product: IProduct): void` — удаляет товар из корзины 
+
+`getCartItems(): IProduct[]` — возвращает список товаров в корзине
+
+`getTotalAmount(): number ` — вычисляет и возвращает общую стоимость товаров
+
+`getItemsCount(): number `— возвращает общее количество товаров в корзине (счетчик)
+
+`hasProduct(id: string): boolean` — проверяет доступное наличие товара по его id 
+
+`clearCart(): void` - очистка корзины
+
+#### Каласс CustomerModel 
+Хранение создание  и валидация данных покупателя
+
+Поля класса: `data: ICustomer = []`
+
+Методы класса:
+
+`setCustomerData(data: ICustomer): void`  — сохраняет данные покупателя
+
+`getCustomerData(): ICustomer` — возвращает данные покупателя
+
+`validateData(): boolean` — проверяет корректность данных в полях
+
+`clearData(): void` - очистка данных покупателя
+
+### Слой Коммуникации
+
+#### Класс ApiClient
+Выполняет запрос на сервер с помощью метода get класса Api и будет получать с сервера объект с массивом товаров
+
+Поля класса: `api: IApi`
+
+Методы класса:
+
+`getProducts(): Promise<IProduct[]>` - делает get запрос на эндпоинт /product/ и возвращает массив товаров
+
+`createOrder(orderData: IOrderRequest): Promise<IOrderResponse> ` - делает post запрос на эндпоинт /order/ и передаёт в него данные, полученные в параметрах метода.
+
+
+
+
