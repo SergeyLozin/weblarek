@@ -133,7 +133,7 @@ class ApiClient {
 
     async createOrder(orderData: OrderRequest): Promise<OrderResponse> {
         try {
-            // Преобразуем payment для API
+           
             const apiOrderData = {
                 ...orderData,
                 payment: orderData.payment === 'card' ? 'online' : 'offline'
