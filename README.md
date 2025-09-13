@@ -168,9 +168,17 @@ Presenter - презентер содержит основную логику п
 
 `getCustomerData(): ICustomer` — возвращает данные покупателя
 
-`validateData(): boolean` — проверяет корректность данных в полях
+`validateData(): boolean` — проверяет корректность данных в полях. Проверяет либо просто валидность всех полей, либо детально по каждому полю
 
 `clearData(): void` - очистка данных покупателя
+
+`setPayment(payment: 'card' | 'cash'): void` - присваивает переданное значение полю payment
+
+`setEmail(email: string): void` - присваивает переданное значение полю email
+
+`setPhone(phone: string): void` - присваивает переданное значение полю phone
+
+`setAddress(address: string): void` - присваивает переданное значение полю adress
 
 ### Слой Коммуникации
 

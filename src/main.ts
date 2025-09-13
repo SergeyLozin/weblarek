@@ -62,6 +62,24 @@ class CustomerModel {
         };
     }
 
+    //  Отдельные методы для полей 
+
+    setPayment(payment: 'card' | 'cash'): void {
+        this.data.payment = payment;
+    }
+
+    setEmail(email: string): void {
+        this.data.email = email;
+    }
+
+    setPhone(phone: string): void {
+        this.data.phone = phone;
+    }
+
+    setAddress(address: string): void {
+        this.data.address = address;
+    }
+
     setCustomerData(data: ICustomer): void {
         this.data = data;
     }
@@ -79,13 +97,52 @@ class CustomerModel {
         };
     }
 
-    validateData(): boolean {
+    
+    validateData(detailed: boolean = false): boolean | {
+        isValid: boolean;
+        payment: { isValid: boolean; message: string };
+        email: { isValid: boolean; message: string };
+        phone: { isValid: boolean; message: string };
+        address: { isValid: boolean; message: string };
+    } {
         const { payment, email, phone, address } = this.data;
-        return (payment === 'card' || payment === 'cash') &&
-               email.includes('@') &&
-               /^\d+$/.test(phone) && phone.length >= 10 &&
-               address.trim().length >= 5;
+
+        const paymentValid = payment === 'card' || payment === 'cash';
+        const emailValid = email.includes('@') && email.length > 5;
+        const phoneValid = /^\d+$/.test(phone) && phone.length >= 10;
+        const addressValid = address.trim().length >= 5;
+
+        const isValid = paymentValid && emailValid && phoneValid && addressValid;
+
+        // Если хотим проверить просто т.е не детально
+        if (!detailed) {
+            return isValid;
+        }
+
+        // Если хотим проверить детально
+        return {
+            isValid,
+            payment: {
+                isValid: paymentValid,
+                message: paymentValid ? 'OK' : 'Выберите способ оплаты: card или cash'
+            },
+            email: {
+                isValid: emailValid,
+                message: emailValid ? 'OK' : 'Введите корректный email'
+            },
+            phone: {
+                isValid: phoneValid,
+                message: phoneValid ? 'OK' : 'Введите корректный номер телефона'
+            },
+            address: {
+                isValid: addressValid,
+                message: addressValid ? 'OK' : 'Введите корректный адрес'
+            }
+        };
     }
+
+     
+
 }
 
 class ProductModel {
@@ -207,16 +264,41 @@ console.log('clearCart()', cartModel.getItemsCount() === 0); //true
 
 
 // ** CustomerModel - проверка методов  
-customerModel.setCustomerData({
-    payment: 'card',
-    email: 'test@test.com',  
-    phone: '79218689001',
-    address: 'Москва, ул. Ленина, 1'
-}); // данные для теста
 
-console.log('getCustomerData()', customerModel.getCustomerData().email === 'test@test.com'); 
-console.log('validateData()', customerModel.validateData() === true);
+// Проверка методов установки по одному полю
 
+customerModel.setPayment('card');
+customerModel.setEmail('test@test.com');
+customerModel.setPhone('79218689001');
+customerModel.setAddress('Москва, ул. Ленина, 1');
+
+console.log('setPayment()', customerModel.getCustomerData().payment === 'card'); // true
+console.log('setEmail()', customerModel.getCustomerData().email === 'test@test.com'); // true
+console.log('setPhone()', customerModel.getCustomerData().phone === '79218689001'); // true
+console.log('setAddress()', customerModel.getCustomerData().address === 'Москва, ул. Ленина, 1'); // true
+
+// Проверка getCustomerData()
+console.log('getCustomerData()', customerModel.getCustomerData().email === 'test@test.com'); // true
+
+// Проверка валидации - просто проверка на валидность
+console.log('validateData() (простая) работает:', customerModel.validateData() === true); // true
+
+// Проверка валидации - детальная детальная валидация
+const validationDetails = customerModel.validateData(true) as {
+    isValid: boolean;
+    payment: { isValid: boolean; message: string };
+    email: { isValid: boolean; message: string };
+    phone: { isValid: boolean; message: string };
+    address: { isValid: boolean; message: string };
+};
+
+console.log('validateData(true) (детальная)', validationDetails.isValid === true); // true
+console.log('  - payment:', validationDetails.payment.isValid, validationDetails.payment.message);
+console.log('  - email:', validationDetails.email.isValid, validationDetails.email.message);
+console.log('  - phone:', validationDetails.phone.isValid, validationDetails.phone.message);
+console.log('  - address:', validationDetails.address.isValid, validationDetails.address.message);
+
+// Проверка clearData
 
 customerModel.clearData();
 const clearedData = customerModel.getCustomerData();
@@ -226,6 +308,18 @@ console.log('clearData() работает:',
     clearedData.phone === '' && 
     clearedData.address === ''
 );
+
+// Проверка setCustomerData
+customerModel.setCustomerData({
+    payment: 'cash',
+    email: 'secondtest@test.com',
+    phone: '79217672827',
+    address: 'Санкт-Петербург, Невский пр., 1'
+});
+console.log('setCustomerData()', customerModel.getCustomerData().email === 'secondtest@test.com'); // true
+
+
+
 
 // ** Запрос на сервер
 apiClient.getProducts()
@@ -240,21 +334,22 @@ apiClient.getProducts()
         console.log('Количество товаров в модели:', savedProducts.length);
         
         // Проверка с данными сервера
-        console.log('getProducts() работает:', productModel.getProducts().length === serverProducts.length);
-        console.log('getProductById() работает:', productModel.getProductById(serverProducts[0]?.id) !== undefined);
+        console.log('getProducts()', productModel.getProducts().length === serverProducts.length);
+        console.log('getProductById()', productModel.getProductById(serverProducts[0]?.id) !== undefined);
         
         cartModel.clearCart();
         if (serverProducts.length > 0) {
             cartModel.addProduct(serverProducts[0]);
-            console.log('addProduct() работает:', cartModel.getItemsCount() === 1);
-            console.log('hasProduct() работает:', cartModel.hasProduct(serverProducts[0].id)); 
+            console.log('addProduct()', cartModel.getItemsCount() === 1);
+            console.log('hasProduct()', cartModel.hasProduct(serverProducts[0].id)); 
         }
         
-        console.log('validateData() работает:', customerModel.validateData() === true);
-        console.log('getProducts() работает:', serverProducts.length > 0);
+        // Проверка валидации с серверными данными 
+        console.log('validateData()', customerModel.validateData() === true); // true
+        console.log('getProducts()', serverProducts.length > 0); // true
     })
     .catch(error => {
         console.error('Ошибка при загрузке товаров:', error);
         productModel.setProducts(apiProducts.items);
-        
+        console.log('Используем тестовые данные');
     });
