@@ -1,42 +1,67 @@
-import { IProduct } from '../../types';
+import { IProduct } from "../../types";
+import { EventEmitter } from "../base/Events";
 
 export class CartModel {
-    private items: IProduct[];
+  private items: IProduct[];
 
-    constructor() {
-        this.items = [];
-    }
+  constructor(private events: EventEmitter) {
+    this.items = [];
+  }
 
-    getCartItems(): IProduct[] {
-        return [...this.items];
-    }
+  getCartItems(): IProduct[] {
+    return [...this.items];
+  }
 
-    addProduct(product: IProduct): void {
-        this.items.push(product);
-    }
+  addProduct(product: IProduct): void {
+    this.items.push(product);
+    this.events.emit("cart:changed", {
+      items: this.items,
+      total: this.getTotalAmount(),
+      count: this.getItemsCount(),
+    });
+  }
 
-    removeProduct(product: IProduct): void {
-        const index = this.items.findIndex(item => item.id === product.id);
-        if (index !== -1) {
-            this.items.splice(index, 1);
-        }
+  removeProduct(product: IProduct): void {
+    const index = this.items.findIndex((item) => item.id === product.id);
+    if (index !== -1) {
+      this.items.splice(index, 1);
+      this.events.emit("cart:changed", {
+        items: this.items,
+        total: this.getTotalAmount(),
+        count: this.getItemsCount(),
+      });
     }
+  }
 
-    clearCart(): void {
-        this.items = [];
-    }
+  clearCart(): void {
+    this.items = [];
 
-    getTotalAmount(): number {
-        return this.items.reduce((total, item) => {
-            return total + (item.price || 0);
-        }, 0);
-    }
+    this.emitCartChanged();
+    console.log("🛒 Корзина очищена");
+  }
 
-    getItemsCount(): number {
-        return this.items.length;
-    }
+  private emitCartChanged(): void {
+    const cartData = {
+      items: this.items,
+      total: this.getTotalAmount(),
+      count: this.getItemsCount(),
+    };
 
-    hasProduct(id: string): boolean {
-        return this.items.some(item => item.id === id);
-    }
+    console.log("📢 Emitting cart:changed", cartData);
+    this.events.emit("cart:changed", cartData);
+  }
+
+  getTotalAmount(): number {
+    return this.items.reduce((total, item) => {
+      return total + (item.price || 0);
+    }, 0);
+  }
+
+  getItemsCount(): number {
+    return this.items.length;
+  }
+
+  hasProduct(id: string): boolean {
+    return this.items.some((item) => item.id === id);
+  }
 }

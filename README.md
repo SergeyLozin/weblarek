@@ -193,6 +193,261 @@ Presenter - презентер содержит основную логику п
 
 `createOrder(orderData: IOrderRequest): Promise<IOrderResponse> ` - делает post запрос на эндпоинт /order/ и передаёт в него данные, полученные в параметрах метода.
 
+### слой View
+Слой View отвечает за отображение данных и взаимодействие с пользователем. Все компоненты наследуются от базового класса Component
+
+
+#### Класс FormView
+Абстрактный базовый класс для всех форм с валидацией.
+
+Конструктор:
+`constructor(container: HTMLFormElement)` - принимает ссылку на DOM-элемент формы
+
+Поля класса:
+`_submitButton: HTMLButtonElement` - кнопка отправки формы
+`_errors: HTMLElement` - элемент для отображения ошибок
+
+Методы класса:
+`setErrors(message: string): void` - устанавливает сообщение об ошибках
+`clearErrors(): void` - очищает сообщения об ошибках
+`setValid(valid: boolean): void` - устанавливает состояние валидности формы (активирует/деактивирует кнопку)
+`getData(): any` - абстрактный метод, возвращает данные формы
+
+#### Класс CardView
+
+Базовый класс для карточек товаров.
+
+Конструктор:
+`constructor(container: HTMLElement)` - принимает ссылку на DOM-элемент карточки
+
+Поля класса:
+`_title: HTMLElement` - элемент заголовка товара
+`_price: HTMLElement `- элемент цены товара
+`_category: HTMLElement` - элемент категории товара
+`_image: HTMLImageElement` - элемент изображения товара
+
+Методы класса:
+`setTitle(title: string): void`- устанавливает заголовок карточки
+`setPrice(price: number | null): void`- устанавливает цену товара (или "Бесценно" для null)
+`setCategory(category: string, categoryClass: string): void` - устанавливает категорию товара и CSS-класс
+`setupImage(src: string, alt: string): void` - устанавливает изображение товара
+
+
+#### Класс CatalogView
+
+Отображает каталог товаров.
+
+Конструктор:
+`constructor(container: HTMLElement)` - принимает контейнер для размещения каталога
+
+Методы класса:
+`setItems(items: HTMLElement[]): void` - отображает массив карточек товаров в каталоге
+
+#### Класс CatalogCardView
+
+Карточка товара в каталоге. Наследуется от CardView.
+
+Конструктор:
+`constructor()` - создает карточку из шаблона card-catalog
+
+Генерируемые события:
+`card:select` - при клике на карточку, содержит productId в event.detail
+
+#### Класс PreviewCardView
+
+Детальная карточка товара в модальном окне. Наследуется от C`ardView`.
+
+Конструктор:
+`constructor(productId: string)` - создает карточку из шаблона `card-preview`
+
+Методы класса:
+`setDescription(description: string): void` - устанавливает описание товара
+`setButtonText(text: string): void` - устанавливает текст кнопки
+`setButtonDisabled(disabled: boolean): void` - блокирует/разблокирует кнопку
+
+Генерируемые события:
+`product:add-to-cart `- при нажатии кнопки "В корзину", содержит `productId `в `event.detail`
+
+#### Класс BasketCardView
+
+Элемент товара в корзине покупок. Наследуется от `CardView`.
+
+Конструктор:
+`constructor(productId: string, index: number)` - создает элемент из шаблона `card-basket`
+
+Методы класса:
+`setTitle(title: string): void `- устанавливает название товара
+`setPrice(price: number | null): void` - устанавливает цену товара
+
+Генерируемые события:
+`basket:remove-item `- при нажатии кнопки удаления, содержит `productId` в `event.detail`
+
+#### Класс BasketView
+
+Представление корзины покупок.
+
+Конструктор:
+`constructor(items: HTMLElement[], total: number)` - создает корзину из шаблона basket
+
+Генерируемые события:
+`basket:checkout` - при нажатии кнопки "Оформить"
+
+#### Класс HeaderView
+
+Представление шапки приложения.
+
+Конструктор:
+`constructor(container: HTMLElement)` - принимает DOM-элемент шапки
+
+Методы класса:
+`setCounter(value: number): void `- обновляет счетчик товаров в корзине
+
+Генерируемые события:
+`header:basket-click` - при клике на иконку корзины
+
+#### Класс ModalView
+
+Управление модальными окнами.
+
+Конструктор:
+`constructor()` - использует DOM-элемент `modal-container`
+
+Методы класса:
+`open(content: HTMLElement): void` - открывает модальное окно с переданным контентом
+`close(): void` - закрывает модальное окно
+
+Генерируемые события:
+`modal:close` - при закрытии модального окна
+
+
+#### Класс OrderFormView
+
+Форма ввода адреса и выбора способа оплаты. Наследуется от FormView.
+
+Конструктор:
+`constructor()` - создает форму из шаблона order
+
+Методы класса:
+`setPayment(method: string): void `- устанавливает способ оплаты ('card' или 'cash')
+`setAddress(address: string): void` - устанавливает адрес доставки
+`getData(): {payment: string, address: string}` - возвращает данные формы
+
+Генерируемые события:
+`payment:change` - при изменении способа оплаты
+`address:change` - при изменении адреса доставки
+`form:submit` - при отправке формы (только при валидных данных)
+
+#### Класс ContactsFormView
+
+Форма ввода контактных данных. Наследуется от FormView.
+
+Конструктор:
+`constructor()` - создает форму из шаблона contacts
+
+Методы класса:
+`setEmail(email: string): void` - устанавливает email
+`setPhone(phone: string): void` - устанавливает телефон
+`getData(): {email: string, phone: string}` - возвращает данные формы
+
+Генерируемые события:
+`email:change` - при изменении email
+`phone:change` - при изменении телефона
+`contacts:submit` - при отправке формы (только при валидных данных)
+
+#### Класс SuccessView
+
+Сообщение об успешном оформлении заказа.
+
+Конструктор:
+`constructor(total: number)` - создает сообщение из шаблона success
+
+Генерируемые события:
+`success:close` - при закрытии сообщения
+
+Взаимодействие компонентов View
+
+Компоненты View генерируют события при взаимодействии пользователя:
+
+Действия с товарами: `card:select, product:add-to-cart, basket:remove-item`
+Навигация: `header:basket-click, basket:checkout`
+Работа с формами: `form:submit, payment:change, address:change, email:change, phone:change, contacts:submit`
+Управление UI: `modal:close, success:close`
+
+
+## Слой Presenter
+
+Презентер содержит основную бизнес-логику приложения и отвечает за координацию взаимодействия между слоями Model и View. Он обрабатывает события от View, обновляет Model и управляет состоянием приложения.
+
+### Класс AppPresenter
+
+Главный презентер приложения, который связывает все компоненты и управляет потоком данных.
+
+**Конструктор:**  
+`constructor(events: EventEmitter, productModel: ProductModel, cartModel: CartModel, customerModel: CustomerModel, apiClient: ApiClient, catalogView: CatalogView, headerView: HeaderView, modalView: ModalView)` - принимает все необходимые зависимости для работы приложения
+
+**Методы класса:**
+
+#### Инициализация
+`private initializeApp(): void` - инициализирует приложение, настраивает обработчики событий и загружает товары
+
+`private setupEventListeners(): void` - настраивает все обработчики событий от Model и View
+
+`private setupCustomEventListeners(): void` - настраивает обработчики кастомных событий от View компонентов
+
+#### Работа с данными
+`private async loadProducts(): Promise<void>` - загружает товары с сервера через ApiClient и сохраняет в ProductModel
+
+`private renderCatalog(products: IProduct[]): void` - отображает каталог товаров, создавая карточки для каждого товара
+
+#### Управление модальными окнами
+`private openProductPreview(product: IProduct): void` - открывает модальное окно с детальной информацией о товаре
+
+`private openBasketModal(): void` - открывает модальное окно корзины с текущими товарами
+
+`private openOrderForm(): void` - открывает форму заказа (адрес и способ оплаты)
+
+`private openContactsForm(): void` - открывает форму контактов (email и телефон)
+
+#### Обработка заказа
+`private async processOrder(): Promise<void>` - основной метод обработки заказа, который:
+- Собирает данные из CustomerModel и CartModel
+- Отправляет заказ на сервер через ApiClient
+- Показывает сообщение об успехе
+- Очищает корзину и данные покупателя
+
+**Обрабатываемые события:**
+
+#### События от Model
+- `products:changed` - при изменении списка товаров, вызывает `renderCatalog()`
+- `product:selected` - при выборе товара, вызывает `openProductPreview()`
+- `cart:changed` - при изменении корзины, обновляет счетчик в HeaderView
+
+#### События от View
+- `card:select` - при клике на карточку товара, устанавливает выбранный товар в ProductModel
+- `product:add-to-cart` - при добавлении товара в корзину, обновляет CartModel
+- `basket:remove-item` - при удалении товара из корзины, обновляет CartModel
+- `header:basket-click` - при клике на корзину, открывает модальное окно корзины
+- `basket:checkout` - при оформлении заказа из корзины, открывает форму заказа
+- `form:submit` - при отправке формы заказа, открывает форму контактов
+- `contacts:submit` - при отправке формы контактов, обрабатывает заказ
+- `payment:change`, `address:change`, `email:change`, `phone:change` - при изменении данных форм, обновляет CustomerModel
+- `success:close` - при закрытии сообщения об успехе, закрывает модальное окно
+
+### Класс ApiClient
+
+Клиент для работы с API, инкапсулирующий логику HTTP-запросов.
+
+**Конструктор:**  
+`constructor(api: Api)` - принимает экземпляр класса Api для выполнения запросов
+
+**Методы класса:**
+
+`async getProducts(): Promise<IProduct[]>` - получает список товаров с сервера, возвращает массив товаров или fallback-данные при ошибке
+
+`async createOrder(orderData: OrderRequest): Promise<any>` - отправляет заказ на сервер, преобразуя данные в формат, ожидаемый API
+
+
+
 
 
 
