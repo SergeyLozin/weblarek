@@ -122,66 +122,56 @@ Presenter - презентер содержит основную логику п
 Хранит и управляет данными о товарах из каталога
 
 Поля класса:
-
-`products: IProduct[]` - массив товаров
-`selectedProduct: IProduct | null` - выбранный товар
+- `products: IProduct[]` - массив товаров
+- `selectedProduct: IProduct | null` - выбранный товар
 
 Методы класса:
-
-`setProducts(products: IProduct[]): void` - сохраняет массив товаров
-`getProducts(): IProduct[]` - возвращает массив товаров
-`setSelectedProduct(product: IProduct): void `- сохраняет выбранный товар
-`getSelectedProduct(): IProduct | null` - возвращает выбранный товар
-`getProductById(id: string): IProduct | undefined `- находит товар по ID
+- `setProducts(products: IProduct[]): void` - сохраняет массив товаров
+- `getProducts(): IProduct[]` - возвращает массив товаров
+- `setSelectedProduct(product: IProduct): void` - сохраняет выбранный товар
+- `getSelectedProduct(): IProduct | null` - возвращает выбранный товар
+- `getProductById(id: string): IProduct | undefined` - находит товар по ID
 
 Генерируемые события:
-
-`products:changed `- при изменении списка товаров
-`product:selected `- при выборе товара
+- `products:changed` - при изменении списка товаров
+- `product:selected` - при выборе товара
 
 #### Класс CartModel
 Управляет состоянием корзины
 
 Поля класса:
+- `items: IProduct[]` - товары в корзине
 
-`items: IProduct[]` - товары в корзине
-
-Методы класса:
-
-`addProduct(product: IProduct): void` - добавляет товар в корзину
-`removeProduct(productId: string): void` - удаляет товар из корзины по ID
-`clearCart(): void` - очищает корзину
-`getCartItems(): IProduct[]` - возвращает список товаров
-`getTotalAmount(): number` - вычисляет общую стоимость
-`getItemsCount(): number` - возвращает количество товаров
-`hasProduct(id: string): boolean` - проверяет наличие товара
+**Методы класса:**
+- `addProduct(product: IProduct): void` - добавляет товар в корзину
+- `removeProduct(productId: string): void` - удаляет товар из корзины по ID
+- `clearCart(): void` - очищает корзину
+- `getCartItems(): IProduct[]` - возвращает список товаров
+- `getTotalAmount(): number` - вычисляет общую стоимость
+- `getItemsCount(): number` - возвращает количество товаров
+- `hasProduct(id: string): boolean` - проверяет наличие товара
 
 Генерируемые события:
+- `cart:changed` - при любом изменении корзины (передает `{items, total, count}`)
 
-`cart:changed` - при любом изменении корзины
-
-
-#### Каласс CustomerModel 
-Хранение создание  и валидация данных покупателя
+#### Класс CustomerModel 
+Хранение, создание и валидация данных покупателя
 
 Поля класса:
-
-`data: ICustomer` - данные покупателя
+- `data: ICustomer` - данные покупателя
 
 Методы класса:
-
-`setData(key: keyof ICustomer, value: string): void` - устанавливает значение поля
-`getCustomerData(): ICustomer` - возвращает данные покупателя
-`clearData(): void` - очищает данные
-`isOrderValid(): boolean` - проверяет валидность данных для заказа
-`isContactsValid(): boolean` - проверяет валидность контактных данных
+- `setData(key: keyof ICustomer, value: string): void` - устанавливает значение поля
+- `getCustomerData(): ICustomer` - возвращает данные покупателя
+- `clearData(): void` - очищает данные
+- `isOrderValid(): boolean` - проверяет валидность данных для заказа
+- `isContactsValid(): boolean` - проверяет валидность контактных данных
 
 Генерируемые события:
-
-`customer:errors `- передает объект с ошибками валидации
-`order:valid` - указывает валидность формы заказа
-`contacts:valid` - указывает валидность формы контактов
-`customer:cleared` - при очистке данных
+- `customer:errors` - передает объект с ошибками валидации
+- `order:valid` - указывает валидность формы заказа
+- `contacts:valid` - указывает валидность формы контактов
+- `customer:cleared` - при очистке данных
 
 ### Слой View
 
@@ -193,29 +183,32 @@ Presenter - презентер содержит основную логику п
 `constructor(container: HTMLElement, events: EventEmitter)`
 
 Методы класса:
+- `setErrors(errors: Record<string, string>): void` - отображает ошибки
+- `clearErrors(): void` - очищает ошибки
+- `setValid(valid: boolean): void` - управляет состоянием кнопки отправки
+- `getData(): any` - абстрактный метод получения данных
 
-`setErrors(errors: Record<string, string>): void` - отображает ошибки
-`clearErrors(): void` - очищает ошибки
-`setValid(valid: boolean): void` - управляет состоянием кнопки отправки
-`getData(): any` - абстрактный метод получения данных
 
 #### Класс CardView
 
-Базовый класс для карточек товаров.
+Базовый класс для всех типов карточек товаров.
 
 Конструктор:
 `constructor(container: HTMLElement, productId: string, events: EventEmitter)`
 
 Поля класса:
-
-`productId: string` - ID товара (хранится в поле класса)
+- `productId: string` - ID товара
+- `_title: HTMLElement` - элемент заголовка
+- `_price: HTMLElement` - элемент цены
+- `_category: HTMLElement | null` - элемент категории (опционально)
+- `_image: HTMLImageElement | null` - элемент изображения (опционально)
 
 Методы класса:
+- `setTitle(title: string): void` - устанавливает заголовок
+- `setPrice(price: number | null): void` - устанавливает цену
+- `setCategory(category: string, categoryClass: string): void` - устанавливает категорию (если элемент существует)
+- `setupImage(src: string, alt: string): void` - устанавливает изображение (если элемент существует)
 
-`setTitle(title: string): void` - устанавливает заголовок
-`setPrice(price: number | null): void` - устанавливает цену
-`setCategory(category: string, categoryClass: string): void `- устанавливает категорию
-`setupImage(src: string, alt: string): void` - устанавливает изображение
 
 #### Класс CatalogView
 
@@ -225,48 +218,44 @@ Presenter - презентер содержит основную логику п
 `constructor(container: HTMLElement)`
 
 Методы класса:
-
-`setItems(items: HTMLElement[]): void` - отображает массив карточек
+- `setItems(items: HTMLElement[]): void` - отображает массив карточек
 
 #### Класс CatalogCardView
 
-Карточка товара в каталоге.
+Карточка товара в каталоге. Наследуется от CardView.
 
 Конструктор:
 `constructor(productId: string, events: EventEmitter)`
 
 Генерируемые события:
-
-`card:select` - при клике на карточку
+- `card:select` - при клике на карточку
 
 #### Класс PreviewCardView
 
-Детальная карточка товара в модальном окне.
+Детальная карточка товара в модальном окне. Наследуется от CardView.
 
 Конструктор:
-`constructor(productId: string, events: EventEmitter, inCart: boolean)`
+`constructor(events: EventEmitter)` - создается один раз при загрузке страницы
 
 Методы класса:
-
-`setDescription(description: string): void `- устанавливает описание
-`setButtonText(text: string): void` - устанавливает текст кнопки
-`setButtonDisabled(disabled: boolean): void` - блокирует кнопку
+- `setDescription(description: string): void` - устанавливает описание
+- `setButtonText(text: string): void` - устанавливает текст кнопки
+- `setButtonDisabled(disabled: boolean): void` - блокирует кнопку
+- `updateButtonState(inCart: boolean): void` - обновляет состояние кнопки
 
 Генерируемые события:
+- `cart:toggle` - при нажатии на кнопку корзины
 
-`product:addToCart` - при добавлении в корзину
-`product:removeFromCart` - при удалении из корзины
 
 #### Класс BasketCardView
 
-Элемент товара в корзине.
+Элемент товара в корзине. Наследуется от CardView.
 
 Конструктор:
 `constructor(productId: string, index: number, events: EventEmitter)`
 
 Генерируемые события:
-
-`basket:removeItem` - при удалении товара из корзины
+- `basket:removeItem` - при удалении товара из корзины
 
 #### Класс BasketView
 
@@ -276,14 +265,13 @@ Presenter - презентер содержит основную логику п
 `constructor(events: EventEmitter)`
 
 Методы класса:
-
-`setItems(items: HTMLElement[]): void` - устанавливает элементы корзины
-`setTotal(total: number): void` - устанавливает общую стоимость
-`setCheckoutEnabled(enabled: boolean): void` - управляет кнопкой оформления
+- `update(items: IProduct[], total: number): void` - обновляет данные корзины
+- `setItems(items: HTMLElement[]): void` - устанавливает элементы корзины
+- `setTotal(total: number): void` - устанавливает общую стоимость
+- `setCheckoutEnabled(enabled: boolean): void` - управляет кнопкой оформления
 
 Генерируемые события:
-
-`basket:checkout` - при нажатии кнопки оформления
+- `basket:checkout` - при нажатии кнопки оформления
 
 #### Класс HeaderView
 
@@ -293,12 +281,10 @@ Presenter - презентер содержит основную логику п
 `constructor(container: HTMLElement, events: EventEmitter)`
 
 Методы класса:
-
-`setCounter(value: number): void `- обновляет счетчик корзины
+- `setCounter(value: number): void` - обновляет счетчик корзины
 
 Генерируемые события:
-
-`header:basketClick` - при клике на иконку корзины
+- `header:basketClick` - при клике на иконку корзины
 
 #### Класс ModalView
 
@@ -308,59 +294,54 @@ Presenter - презентер содержит основную логику п
 `constructor(events: EventEmitter)`
 
 Методы класса:
-
-`open(content: HTMLElement): void` - открывает модальное окно
-`close(): void` - закрывает модальное окно
+- `open(content: HTMLElement): void` - открывает модальное окно
+- `close(): void` - закрывает модальное окно
+- `isOpen(): boolean` - проверяет открыто ли модальное окно
 
 Генерируемые события:
-
-`modal:open` - при открытии модального окна
-`modal:close` - при закрытии модального окна
+- `modal:open` - при открытии модального окна
+- `modal:close` - при закрытии модального окна
 
 #### Класс OrderFormView
 
-Форма ввода адреса и способа оплаты.
+Форма ввода адреса и способа оплаты. Наследуется от FormView.
 
 Конструктор:
 `constructor(events: EventEmitter)`
 
 Методы класса:
-
-`setPayment(method: string): void` - устанавливает способ оплаты
-`setAddress(address: string): void `- устанавливает адрес
+- `setPayment(method: string): void` - устанавливает способ оплаты
+- `setAddress(address: string): void` - устанавливает адрес
 
 Генерируемые события:
-
-`order:fieldChange` - при изменении полей формы
-`order:submit` - при отправке формы
+- `order:submit` - при отправке формы
 
 #### Класс ContactsFormView
 
-Форма ввода контактных данных.
+Форма ввода контактных данных. Наследуется от FormView.
 
 Конструктор:
 `constructor(events: EventEmitter)`
 
 Методы класса:
-
-`setEmail(email: string): void `- устанавливает email
-`setPhone(phone: string): void` - устанавливает телефон
+- `setEmail(email: string): void` - устанавливает email
+- `setPhone(phone: string): void` - устанавливает телефон
 
 Генерируемые события:
-
-`contacts:fieldChange` - при изменении полей формы
-`contacts:submit` - при отправке формы
+- `contacts:submit` - при отправке формы
 
 #### Класс SuccessView
 
 Сообщение об успешном оформлении заказа.
 
 Конструктор:
-`constructor(total: number, events: EventEmitter)`
+`constructor(events: EventEmitter)` - создается один раз при загрузке страницы
+
+Методы класса:
+- `setTotal(total: number): void` - устанавливает сумму заказа
 
 Генерируемые события:
-
-`success:close` - при закрытии сообщения
+- `success:close` - при закрытии сообщения
 
 #### Класс ApiClient
 
@@ -370,9 +351,8 @@ Presenter - презентер содержит основную логику п
 `constructor(api: Api)`
 
 Методы класса:
-
-`getProducts(): Promise<IProduct[]> `- получает список товаров
-`createOrder(orderData: OrderRequest): Promise<OrderResponse>` - создает заказ
+- `getProducts(): Promise<IProduct[]>` - получает список товаров
+- `createOrder(orderData: OrderRequest): Promise<OrderResponse>` - создает заказ
 
 ### Слой Presenter
 
@@ -380,28 +360,19 @@ Presenter - презентер содержит основную логику п
 
 Презентер реализован как набор обработчиков событий в файле main.ts, который координирует взаимодействие между Model и View.
 
-Ключевые особенности:
-
-Не содержит объявлений классов
-Состоит из обработчиков событий events.on()
-Создает экземпляры View один раз при загрузке приложения
-Использует EventEmitter для всех пользовательских событий
 Основные обработчики:
-
-`app:init` - инициализация приложения
-`products:changed` - отображение каталога
-`card:select` - выбор товара
-`product:selected` - показ детальной информации
-`product:addToCart` / product:removeFromCart - управление корзиной
-`cart:changed` - обновление UI корзины
-`header:basketClick` - открытие корзины
-`basket:checkout` - переход к оформлению заказа
-`order:fieldChange / contacts:fieldChange` - обработка ввода данных
-`customer:errors` - отображение ошибок валидации
-`order:valid / contacts:valid` - управление состоянием кнопок
-`order:submit / contacts:submit` - обработка отправки форм
-`success:close` - завершение заказа
-
-
-
+- Загрузка товаров происходит напрямую при инициализации приложения
+- `products:changed` - отображение каталога
+- `card:select` - выбор товара
+- `product:selected` - показ детальной информации
+- `cart:toggle` - переключение состояния товара в корзине
+- `cart:changed` - обновление UI корзины и счетчика
+- `header:basketClick` - открытие корзины
+- `basket:removeItem` - удаление товара из корзины
+- `basket:checkout` - переход к оформлению заказа
+- `form:fieldChange` - общая обработка ввода данных во всех формах
+- `customer:errors` - отображение ошибок валидации
+- `order:valid / contacts:valid` - управление состоянием кнопок
+- `order:submit / contacts:submit` - обработка отправки форм
+- `success:close` - завершение заказа
 

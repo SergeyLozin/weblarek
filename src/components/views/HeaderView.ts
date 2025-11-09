@@ -1,5 +1,6 @@
 import { Component } from "../base/Component";
 import { EventEmitter } from "../base/Events";
+import { ensureElement } from "../../utils/utils";
 
 export class HeaderView extends Component<HTMLElement> {
     private _basketButton: HTMLButtonElement;
@@ -7,8 +8,8 @@ export class HeaderView extends Component<HTMLElement> {
 
     constructor(container: HTMLElement, events: EventEmitter) {
         super(container);
-        this._basketButton = this.container.querySelector('.header__basket')!;
-        this._counter = this.container.querySelector('.header__basket-counter')!;
+        this._basketButton = ensureElement<HTMLButtonElement>('.header__basket', this.container);
+        this._counter = ensureElement<HTMLElement>('.header__basket-counter', this.container);
 
         this._basketButton.addEventListener('click', () => {
             events.emit('header:basketClick');

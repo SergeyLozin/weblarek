@@ -1,21 +1,34 @@
 import { Component } from "../base/Component";
 import { EventEmitter } from "../base/Events";
+import { ensureElement } from "../../utils/utils";
 
 export abstract class CardView extends Component<HTMLElement> {
     protected _title: HTMLElement;
     protected _price: HTMLElement;
-    protected _category: HTMLElement;
-    protected _image: HTMLImageElement;
-    protected productId: string;
+    protected _category: HTMLElement | null;
+    protected _image: HTMLImageElement | null;
+    public productId: string;
 
     constructor(container: HTMLElement, productId: string, protected events: EventEmitter) {
         super(container);
         this.productId = productId;
         
-        this._title = container.querySelector('.card__title')!;
-        this._price = container.querySelector('.card__price')!;
-        this._category = container.querySelector('.card__category')!;
-        this._image = container.querySelector('.card__image')!;
+        // Обязательные элементы
+        this._title = ensureElement<HTMLElement>('.card__title', this.container);
+        this._price = ensureElement<HTMLElement>('.card__price', this.container);
+        
+        // Опциональные элементы (могут отсутствовать в некоторых шаблонах)
+        this._category = this.findOptionalElement('.card__category');
+        this._image = this.findOptionalElement<HTMLImageElement>('.card__image');
+    }
+
+    // Вспомогательный метод для поиска опциональных элементов
+    private findOptionalElement<T extends HTMLElement>(selector: string): T | null {
+        try {
+            return ensureElement<T>(selector, this.container);
+        } catch {
+            return null;
+        }
     }
 
     setTitle(title: string): void {
@@ -27,11 +40,19 @@ export abstract class CardView extends Component<HTMLElement> {
     }
 
     setCategory(category: string, categoryClass: string): void {
-        this._category.textContent = category;
-        this._category.className = `card__category card__category_${categoryClass}`;
+        if (this._category) {
+            this._category.textContent = category;
+            this._category.className = `card__category ${categoryClass}`;
+        }
     }
 
     setupImage(src: string, alt: string): void {
-        this.setImage(this._image, src, alt);
+        if (this._image) {
+            this.setImage(this._image, src, alt);
+        }
+    }
+
+    render(): HTMLElement {
+        return this.container;
     }
 }

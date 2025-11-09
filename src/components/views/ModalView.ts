@@ -1,5 +1,6 @@
 import { Component } from "../base/Component";
 import { EventEmitter } from "../base/Events";
+import { ensureElement } from "../../utils/utils";
 
 export class ModalView extends Component<HTMLElement> {
     private _closeButton: HTMLButtonElement;
@@ -9,8 +10,8 @@ export class ModalView extends Component<HTMLElement> {
         const container = document.getElementById('modal-container') as HTMLElement;
         super(container);
         
-        this._closeButton = this.container.querySelector('.modal__close')!;
-        this._content = this.container.querySelector('.modal__content')!;
+        this._closeButton = ensureElement<HTMLButtonElement>('.modal__close', this.container);
+        this._content = ensureElement<HTMLElement>('.modal__content', this.container);
 
         this._closeButton.addEventListener('click', () => {
             this.close();
@@ -45,6 +46,11 @@ export class ModalView extends Component<HTMLElement> {
         this.container.classList.remove('modal_active');
         this._content.innerHTML = '';
         this.events.emit('modal:close');
+    }
+
+    // Добавляем метод для проверки открыто ли модальное окно
+    isOpen(): boolean {
+        return this.container.classList.contains('modal_active');
     }
 
     render(): HTMLElement {

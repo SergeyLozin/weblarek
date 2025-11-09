@@ -1,5 +1,6 @@
 import { CardView } from "./CardView";
 import { EventEmitter } from "../base/Events";
+import { ensureElement } from "../../utils/utils";
 
 export class BasketCardView extends CardView {
     private _index: HTMLElement;
@@ -11,8 +12,8 @@ export class BasketCardView extends CardView {
         const element = container.firstElementChild as HTMLElement;
         super(element, productId, events);
 
-        this._index = this.container.querySelector('.basket__item-index')!;
-        this._deleteButton = this.container.querySelector('.basket__item-delete')!;
+        this._index = ensureElement<HTMLElement>('.basket__item-index', this.container);
+        this._deleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
 
         this._index.textContent = index.toString();
 

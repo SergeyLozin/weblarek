@@ -1,7 +1,7 @@
 
 import { FormView } from './FormView';
 import { EventEmitter } from '../base/Events';
-import { ensureAllElements } from '../../utils/utils';
+import { ensureAllElements, ensureElement } from '../../utils/utils';
 
 export class OrderFormView extends FormView {
     private _addressInput: HTMLInputElement;
@@ -13,23 +13,15 @@ export class OrderFormView extends FormView {
         const form = container.querySelector('form') as HTMLElement;
         super(form, events);
 
-        this._addressInput = this.container.querySelector('input[name="address"]')!;
+        this._addressInput = ensureElement<HTMLInputElement>('input[name="address"]', this.container);
         this._paymentButtons = ensureAllElements<HTMLButtonElement>('button[name]', this.container);
 
         this.setPaymentMethod('card');
-        this.setupEventListeners();
+        this.setupPaymentListeners();
+        this.setupSubmitListener();
     }
 
-    private setupEventListeners(): void {
-        // Обработчик ввода адреса
-        this._addressInput.addEventListener('input', (event: Event) => {
-            const target = event.target as HTMLInputElement;
-            this.events.emit('order:fieldChange', {
-                field: 'address',
-                value: target.value
-            });
-        });
-
+    private setupPaymentListeners(): void {
         // Обработчики кнопок оплаты
         this._paymentButtons.forEach(button => {
             button.addEventListener('click', (event: Event) => {
@@ -37,13 +29,15 @@ export class OrderFormView extends FormView {
                 const target = event.target as HTMLButtonElement;
                 const method = target.name as string;
                 this.setPaymentMethod(method);
-                this.events.emit('order:fieldChange', {
+                this.events.emit('form:fieldChange', {
                     field: 'payment',
                     value: method
                 });
             });
         });
+    }
 
+    private setupSubmitListener(): void {
         // Обработчик отправки формы
         this.container.addEventListener('submit', (event: Event) => {
             event.preventDefault();

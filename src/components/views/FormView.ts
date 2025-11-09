@@ -1,6 +1,7 @@
 
 import { Component } from '../base/Component';
 import { EventEmitter } from '../base/Events';
+import { ensureElement, ensureAllElements } from '../../utils/utils';
 
 export abstract class FormView extends Component<HTMLElement> {
     protected _submitButton: HTMLButtonElement;
@@ -8,11 +9,30 @@ export abstract class FormView extends Component<HTMLElement> {
 
     constructor(container: HTMLElement, protected events: EventEmitter) {
         super(container);
-        this._submitButton = this.container.querySelector('button[type="submit"]')!;
-        this._errors = this.container.querySelector('.form__errors')!;
+        this._submitButton = ensureElement<HTMLButtonElement>('button[type="submit"]', this.container);
+        this._errors = ensureElement<HTMLElement>('.form__errors', this.container);
         
-        // Изначально кнопка заблокирована
         this._submitButton.disabled = true;
+        
+        // Устанавливаем общие обработчики для полей ввода
+        this.setupInputListeners();
+    }
+
+    /**
+     * Устанавливает обработчики для всех полей ввода в форме
+     */
+    private setupInputListeners(): void {
+        const inputs = ensureAllElements<HTMLInputElement>('input', this.container);
+        
+        inputs.forEach(input => {
+            input.addEventListener('input', (event: Event) => {
+                const target = event.target as HTMLInputElement;
+                this.events.emit('form:fieldChange', {
+                    field: target.name,
+                    value: target.value
+                });
+            });
+        });
     }
 
     protected setErrors(errors: Record<string, string>): void {

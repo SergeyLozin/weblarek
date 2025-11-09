@@ -22,6 +22,7 @@ export class CartModel {
         }
     }
 
+
     clearCart(): void {
         this.items = [];
         this.emitChange();

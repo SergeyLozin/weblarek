@@ -1,6 +1,7 @@
 
 import { FormView } from './FormView';
 import { EventEmitter } from '../base/Events';
+import { ensureElement } from '../../utils/utils';
 
 export class ContactsFormView extends FormView {
     private _emailInput: HTMLInputElement;
@@ -12,24 +13,13 @@ export class ContactsFormView extends FormView {
         const form = container.querySelector('form') as HTMLElement;
         super(form, events);
 
-        this._emailInput = this.container.querySelector('input[name="email"]')!;
-        this._phoneInput = this.container.querySelector('input[name="phone"]')!;
+        this._emailInput = ensureElement<HTMLInputElement>('input[name="email"]', this.container);
+        this._phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
 
-        this.setupEventListeners();
+        this.setupSubmitListener();
     }
 
-    private setupEventListeners(): void {
-        // Обработчики полей ввода
-        [this._emailInput, this._phoneInput].forEach(input => {
-            input.addEventListener('input', (event: Event) => {
-                const target = event.target as HTMLInputElement;
-                this.events.emit('contacts:fieldChange', {
-                    field: target.name,
-                    value: target.value
-                });
-            });
-        });
-
+    private setupSubmitListener(): void {
         // Обработчик отправки формы
         this.container.addEventListener('submit', (event: Event) => {
             event.preventDefault();
