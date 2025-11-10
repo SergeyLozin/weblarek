@@ -259,19 +259,21 @@ Presenter - презентер содержит основную логику п
 
 #### Класс BasketView
 
-Представление корзины покупок.
+Представление корзины покупок. Получает готовую разметку для отображения.
 
 Конструктор:
 `constructor(events: EventEmitter)`
 
 Методы класса:
-- `update(items: IProduct[], total: number): void` - обновляет данные корзины
-- `setItems(items: HTMLElement[]): void` - устанавливает элементы корзины
+- `setItems(items: HTMLElement[]): void` - устанавливает готовые DOM-элементы корзины
 - `setTotal(total: number): void` - устанавливает общую стоимость
 - `setCheckoutEnabled(enabled: boolean): void` - управляет кнопкой оформления
+- `render(): HTMLElement` - возвращает корневой элемент корзины
 
 Генерируемые события:
 - `basket:checkout` - при нажатии кнопки оформления
+
+
 
 #### Класс HeaderView
 

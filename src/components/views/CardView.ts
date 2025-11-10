@@ -13,16 +13,12 @@ export abstract class CardView extends Component<HTMLElement> {
         super(container);
         this.productId = productId;
         
-        // Обязательные элементы
         this._title = ensureElement<HTMLElement>('.card__title', this.container);
         this._price = ensureElement<HTMLElement>('.card__price', this.container);
-        
-        // Опциональные элементы (могут отсутствовать в некоторых шаблонах)
         this._category = this.findOptionalElement('.card__category');
         this._image = this.findOptionalElement<HTMLImageElement>('.card__image');
     }
 
-    // Вспомогательный метод для поиска опциональных элементов
     private findOptionalElement<T extends HTMLElement>(selector: string): T | null {
         try {
             return ensureElement<T>(selector, this.container);

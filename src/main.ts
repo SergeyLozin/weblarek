@@ -18,6 +18,7 @@ import { PreviewCardView } from './components/views/PreviewCardView';
 import { CDN_URL, categoryMap } from './utils/constants';
 import { ensureElement } from './utils/utils';
 import { IProduct, ICustomer } from './types';
+import { BasketCardView } from './components/views/BasketCardView';
 
 // Инициализация
 const events = new EventEmitter();
@@ -105,13 +106,23 @@ events.on('product:selected', (data: { product: IProduct }) => {
     modalView.open(previewCardView.render());
 });
 
-
-
 // Открытие корзины
 events.on('header:basketClick', () => {
     const items = cartModel.getCartItems();
     const total = cartModel.getTotalAmount();
-    basketView.update(items, total);
+    
+    // Создаем элементы корзины в обработчике
+    const basketCards = items.map((item, index) => {
+        const card = new BasketCardView(item.id, index + 1, events);
+        card.setTitle(item.title);
+        card.setPrice(item.price);
+        return card.render();
+    });
+    
+    basketView.setItems(basketCards);
+    basketView.setTotal(total);
+    basketView.setCheckoutEnabled(items.length > 0);
+    
     modalView.open(basketView.render());
 });
 
@@ -120,10 +131,25 @@ events.on('cart:changed', (data: { count: number; items: IProduct[]; total: numb
     // Обновляем счетчик в хедере
     headerView.setCounter(data.count);
     
-    // Если корзина открыта, обновляем ее данные
+    // Если корзина открыта, обновляем ее данные (в любом случае)
     if (modalView.isOpen()) {
-        basketView.update(data.items, data.total);
+        const basketCards = data.items.map((item, index) => {
+            const card = new BasketCardView(item.id, index + 1, events);
+            card.setTitle(item.title);
+            card.setPrice(item.price);
+            return card.render();
+        });
+        
+        basketView.setItems(basketCards);
+        basketView.setTotal(data.total);
+        basketView.setCheckoutEnabled(data.items.length > 0);
     }
+});
+
+// Удаление товара из корзины
+events.on('basket:removeItem', (data: { productId: string }) => {
+    cartModel.removeProduct(data.productId);
+    // Обновление произойдет автоматически через событие cart:changed
 });
 
 // Переключение товара в корзине из окна деталей
@@ -133,19 +159,12 @@ events.on('cart:toggle', (data: { productId: string }) => {
         if (cartModel.hasProduct(data.productId)) {
             cartModel.removeProduct(data.productId);
         } else {
-            // Проверяем, что товар имеет цену
             if (product.price !== null) {
                 cartModel.addProduct(product);
             }
         }
         modalView.close();
     }
-});
-
-// Удаление товара из корзины
-events.on('basket:removeItem', (data: { productId: string }) => {
-    cartModel.removeProduct(data.productId);
-    // Все остальное автоматически обработается через событие cart:changed
 });
 
 // Оформление заказа из корзины

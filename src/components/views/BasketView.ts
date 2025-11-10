@@ -1,8 +1,7 @@
 import { Component } from "../base/Component";
 import { EventEmitter } from "../base/Events";
 import { ensureElement } from "../../utils/utils";
-import { BasketCardView } from "./BasketCardView";
-import { IProduct } from "../../types";
+
 
 export class BasketView extends Component<HTMLElement> {
     private _list: HTMLElement;
@@ -22,20 +21,6 @@ export class BasketView extends Component<HTMLElement> {
         this._checkoutButton.addEventListener('click', () => {
             this.events.emit('basket:checkout');
         });
-    }
-
-    update(items: IProduct[], total: number): void {
-        const basketCards = items.map((item, index) => {
-            const card = new BasketCardView(item.id, index + 1, this.events);
-            card.setTitle(item.title);
-            card.setPrice(item.price);
-            // Не вызываем setCategory и setupImage для корзины
-            return card.render();
-        });
-        
-        this.setItems(basketCards);
-        this.setTotal(total);
-        this.setCheckoutEnabled(items.length > 0);
     }
 
     setItems(items: HTMLElement[]): void {
