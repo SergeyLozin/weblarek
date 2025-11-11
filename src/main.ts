@@ -1,4 +1,3 @@
-
 import './scss/styles.scss';
 import { EventEmitter } from './components/base/Events';
 import { Api } from './components/base/Api';
@@ -15,10 +14,10 @@ import { ContactsFormView } from './components/views/ContactsFormView';
 import { SuccessView } from './components/views/SuccessView';
 import { CatalogCardView } from './components/views/CatalogCardView';
 import { PreviewCardView } from './components/views/PreviewCardView';
+
 import { CDN_URL, categoryMap } from './utils/constants';
 import { ensureElement } from './utils/utils';
 import { IProduct, ICustomer } from './types';
-import { BasketCardView } from './components/views/BasketCardView';
 
 // Инициализация
 const events = new EventEmitter();
@@ -38,7 +37,7 @@ const basketView = new BasketView(events);
 const orderFormView = new OrderFormView(events);
 const contactsFormView = new ContactsFormView(events);
 const previewCardView = new PreviewCardView(events);
-const successView = new SuccessView(events); // Создаем один раз
+const successView = new SuccessView(events);
 
 // Загрузка товаров при инициализации приложения
 apiClient.getProducts()
@@ -60,7 +59,6 @@ events.on('products:changed', (data: { products: IProduct[] }) => {
         const categoryClass = categoryMap[product.category as keyof typeof categoryMap] || 'other';
         card.setCategory(product.category, categoryClass);
         
-        // Исправляем формирование URL изображения
         const imageUrl = `${CDN_URL}${product.image}`;
         card.setupImage(imageUrl, product.title);
         
@@ -106,52 +104,6 @@ events.on('product:selected', (data: { product: IProduct }) => {
     modalView.open(previewCardView.render());
 });
 
-// Открытие корзины
-events.on('header:basketClick', () => {
-    const items = cartModel.getCartItems();
-    const total = cartModel.getTotalAmount();
-    
-    // Создаем элементы корзины в обработчике
-    const basketCards = items.map((item, index) => {
-        const card = new BasketCardView(item.id, index + 1, events);
-        card.setTitle(item.title);
-        card.setPrice(item.price);
-        return card.render();
-    });
-    
-    basketView.setItems(basketCards);
-    basketView.setTotal(total);
-    basketView.setCheckoutEnabled(items.length > 0);
-    
-    modalView.open(basketView.render());
-});
-
-// Обновление состояния при изменении корзины
-events.on('cart:changed', (data: { count: number; items: IProduct[]; total: number }) => {
-    // Обновляем счетчик в хедере
-    headerView.setCounter(data.count);
-    
-    // Если корзина открыта, обновляем ее данные (в любом случае)
-    if (modalView.isOpen()) {
-        const basketCards = data.items.map((item, index) => {
-            const card = new BasketCardView(item.id, index + 1, events);
-            card.setTitle(item.title);
-            card.setPrice(item.price);
-            return card.render();
-        });
-        
-        basketView.setItems(basketCards);
-        basketView.setTotal(data.total);
-        basketView.setCheckoutEnabled(data.items.length > 0);
-    }
-});
-
-// Удаление товара из корзины
-events.on('basket:removeItem', (data: { productId: string }) => {
-    cartModel.removeProduct(data.productId);
-    // Обновление произойдет автоматически через событие cart:changed
-});
-
 // Переключение товара в корзине из окна деталей
 events.on('cart:toggle', (data: { productId: string }) => {
     const product = productModel.getProductById(data.productId);
@@ -165,6 +117,24 @@ events.on('cart:toggle', (data: { productId: string }) => {
         }
         modalView.close();
     }
+});
+
+// Обновление состояния при изменении корзины
+events.on('cart:changed', (data: { count: number; items: IProduct[]; total: number }) => {
+    // Обновляем счетчик в хедере
+    headerView.setCounter(data.count);
+    
+    // Корзина автоматически обновится через подписку в BasketView
+});
+
+// Открытие корзины
+events.on('header:basketClick', () => {
+    modalView.open(basketView.render());
+});
+
+// Удаление товара из корзины
+events.on('basket:removeItem', (data: { productId: string }) => {
+    cartModel.removeProduct(data.productId);
 });
 
 // Оформление заказа из корзины
@@ -182,9 +152,10 @@ events.on('form:fieldChange', (data: { field: string; value: string }) => {
     customerModel.setData(field, data.value);
 });
 
-// Обработка ошибок формы заказа
+// Обработка ошибок форм
 events.on('customer:errors', (data: { errors: Record<string, string> }) => {
     orderFormView.setErrors(data.errors);
+    contactsFormView.setErrors(data.errors);
 });
 
 // Валидность формы заказа
@@ -201,13 +172,6 @@ events.on('order:submit', () => {
         contactsFormView.setPhone(customerData.phone);
         modalView.open(contactsFormView.render());
     }
-});
-
-
-
-// Обработка ошибок формы контактов
-events.on('customer:errors', (data: { errors: Record<string, string> }) => {
-    contactsFormView.setErrors(data.errors);
 });
 
 // Валидность формы контактов
