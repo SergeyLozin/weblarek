@@ -14,7 +14,7 @@ import { ContactsFormView } from './components/views/ContactsFormView';
 import { SuccessView } from './components/views/SuccessView';
 import { CatalogCardView } from './components/views/CatalogCardView';
 import { PreviewCardView } from './components/views/PreviewCardView';
-
+import { BasketCardView } from './components/views/BasketCardView';
 import { CDN_URL, categoryMap } from './utils/constants';
 import { ensureElement } from './utils/utils';
 import { IProduct, ICustomer } from './types';
@@ -48,6 +48,24 @@ apiClient.getProducts()
         console.error('Ошибка при загрузке товаров:', error);
         alert('Не удалось загрузить товары. Пожалуйста, обновите страницу.');
     });
+
+// Обработчик обновления корзины
+events.on('basket:change', () => {
+    // Обновляем счетчик в шапке
+    headerView.setCounter(cartModel.getItemsCount());
+    
+    // Создаем элементы корзины
+    const basketItems = cartModel.getCartItems().map((item, index) => {
+        const card = new BasketCardView(item.id, index + 1, events);
+        card.setTitle(item.title);
+        card.setPrice(item.price);
+        return card.render();
+    });
+    
+    // Передаем результат в представление корзины
+    basketView.items = basketItems;
+    basketView.total = cartModel.getTotalAmount();
+});
 
 // Отображение каталога
 events.on('products:changed', (data: { products: IProduct[] }) => {
@@ -117,14 +135,6 @@ events.on('cart:toggle', (data: { productId: string }) => {
         }
         modalView.close();
     }
-});
-
-// Обновление состояния при изменении корзины
-events.on('cart:changed', (data: { count: number; items: IProduct[]; total: number }) => {
-    // Обновляем счетчик в хедере
-    headerView.setCounter(data.count);
-    
-    // Корзина автоматически обновится через подписку в BasketView
 });
 
 // Открытие корзины

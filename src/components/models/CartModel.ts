@@ -7,7 +7,7 @@ export class CartModel {
 
     constructor(private events: EventEmitter) {}
 
-    addProduct(product: IProduct): void {
+     addProduct(product: IProduct): void {
         if (!this.hasProduct(product.id)) {
             this.items.push(product);
             this.emitChange();
@@ -22,11 +22,11 @@ export class CartModel {
         }
     }
 
-
     clearCart(): void {
         this.items = [];
         this.emitChange();
     }
+
 
     getCartItems(): IProduct[] {
         return [...this.items];
@@ -45,10 +45,6 @@ export class CartModel {
     }
 
     private emitChange(): void {
-        this.events.emit('cart:changed', {
-            items: this.items,
-            total: this.getTotalAmount(),
-            count: this.getItemsCount()
-        });
+        this.events.emit('basket:change'); 
     }
 }
